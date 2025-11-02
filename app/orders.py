@@ -2,12 +2,14 @@
 
 from flask import Blueprint, jsonify, request
 from .db import get_db_connection
+from .decorators import staff_required
 
 # We use a general prefix since this file handles /orders AND /items
 orders_bp = Blueprint('orders', __name__, url_prefix='/api')
 
 
 @orders_bp.route('/orders', methods=['GET'])
+@staff_required
 def get_orders():
     """ Function to get the last 1000 orders, most recent first. """
     conn = get_db_connection()
@@ -27,6 +29,7 @@ def get_orders():
 
 
 @orders_bp.route('/orders', methods=['POST'])
+@staff_required
 def add_order():
     """ Function to add a new order. This is a TRANSACTION. """
     data = request.get_json()
@@ -85,6 +88,7 @@ def add_order():
 
 
 @orders_bp.route('/items', methods=['GET'])
+@staff_required
 def get_items():
     """ Function to get the last 1000 items, most recent first. """
     conn = get_db_connection()

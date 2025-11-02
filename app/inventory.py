@@ -2,11 +2,13 @@
 
 from flask import Blueprint, jsonify, request
 from .db import get_db_connection
+from .decorators import manager_required, staff_required
 
 inventory_bp = Blueprint('inventory', __name__, url_prefix='/api')
 
 
 @inventory_bp.route('/inventory', methods=['GET'])
+@staff_required
 def get_inventory():
     """ Function to get all inventory items. """
     conn = get_db_connection()
@@ -26,6 +28,7 @@ def get_inventory():
 
 
 @inventory_bp.route('/inventory/<int:inv_item_id>', methods=['PUT'])
+@manager_required
 def update_inventory(inv_item_id):
     """ Function to update an inventory item using its inv_item_id. """
     data = request.get_json()
@@ -60,6 +63,7 @@ def update_inventory(inv_item_id):
 
 
 @inventory_bp.route('/inventory/<int:inv_item_id>', methods=['DELETE'])
+@manager_required
 def delete_inventory(inv_item_id):
     """ Function to delete an inventory item using its inv_item_id. """
     conn = get_db_connection()
@@ -83,6 +87,7 @@ def delete_inventory(inv_item_id):
 
 
 @inventory_bp.route('/ingredients', methods=['GET'])
+@staff_required
 def get_ingredients():
     """ Function to get all ingredients. """
     conn = get_db_connection()

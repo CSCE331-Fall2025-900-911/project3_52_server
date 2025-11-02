@@ -1,7 +1,8 @@
 # server_flask/app/products.py
 
 from flask import Blueprint, jsonify, request
-from .db import get_db_connection  # Import our shared db function
+from .db import get_db_connection
+from .decorators import manager_required# Import our shared db function
 
 # Define the blueprint
 products_bp = Blueprint('products', __name__, url_prefix='/api/products')
@@ -27,6 +28,7 @@ def get_products():
 
 
 @products_bp.route('/', methods=['POST'])
+@manager_required
 def add_product():
     """ Function to add a new product. """
     data = request.get_json()
@@ -65,6 +67,7 @@ def add_product():
 
 
 @products_bp.route('/<int:product_id>', methods=['PUT'])
+@manager_required
 def update_product(product_id):
     """ Function to update an existing product using its product_id. """
     data = request.get_json()

@@ -1,22 +1,27 @@
 # server_flask/app/__init__.py
 
 import os
-from flask import Flask, jsonify
+from flask import Flask, jsonify, session  # Import session
 from flask_cors import CORS
 from dotenv import load_dotenv
+from flask_session import Session  # Import Session
 
 
 def create_app():
-    # Load environment variables from .env file
     load_dotenv()
 
-    # Initialize the Flask app
     app = Flask(__name__)
-    CORS(app)  # Enable CORS for all routes
+    # --- New Session Config ---
+    app.config["SECRET_KEY"] = os.environ.get("FLASK_SECRET_KEY")
+    # Configure session to use the filesystem (no db needed)
+    app.config["SESSION_TYPE"] = "filesystem"
+    app.config["SESSION_PERMANENT"] = True  # Make sessions last
+    Session(app)
+
+    # Enable CORS for all routes, and support credentials (cookies)
+    CORS(app, supports_credentials=True)
 
     # --- Register Blueprints ---
-    # We import and register each part of our app
-
     from . import products
     app.register_blueprint(products.products_bp)
 
@@ -29,10 +34,15 @@ def create_app():
     from . import staff
     app.register_blueprint(staff.staff_bp)
 
-    # --- A simple health-check route ---
+    # --- New Auth Blueprint ---
+    from . import auth
+    # Register the main /api/auth blueprint
+    app.register_blueprint(auth.auth_bp)
+    # Register the nested /api/auth/google blueprint
+    app.register_blueprint(auth.google_bp, url_prefix='/api/auth')
+
     @app.route('/')
     def home():
-        """A simple health-check route to see if the server is running."""
         return "TeaFlow API is running!"
 
     return app

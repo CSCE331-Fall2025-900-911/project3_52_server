@@ -2,11 +2,13 @@
 
 from flask import Blueprint, jsonify, request
 from .db import get_db_connection
+from .decorators import manager_required
 
 staff_bp = Blueprint('staff', __name__, url_prefix='/api/staff')
 
 
 @staff_bp.route('/', methods=['GET'])
+@manager_required
 def get_staff():
     """ Function to get all staff members. """
     conn = get_db_connection()
@@ -26,6 +28,7 @@ def get_staff():
 
 
 @staff_bp.route('/', methods=['POST'])
+@manager_required
 def add_employee():
     """ Function to add a new employee. """
     data = request.get_json()
@@ -59,6 +62,7 @@ def add_employee():
 
 
 @staff_bp.route('/<string:staff_id>', methods=['PUT'])
+@manager_required
 def update_employee(staff_id):
     """ Function to update an existing employee's details. """
     data = request.get_json()
@@ -96,6 +100,7 @@ def update_employee(staff_id):
 
 
 @staff_bp.route('/<string:staff_id>', methods=['DELETE'])
+@manager_required
 def remove_employee(staff_id):
     """ Function to remove an employee using their staff_id. """
     conn = get_db_connection()
