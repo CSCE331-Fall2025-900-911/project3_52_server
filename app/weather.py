@@ -50,15 +50,15 @@ def get_weather():
         data = response.json()
 
         # Simplify the data to send to the frontend
-        weather_data = {
-            "temp": data["main"]["temp"],
-            "feels_like": data["main"]["feels_like"],
-            "description": data["weather"][0]["description"].title(),
-            "icon": data["weather"][0]["icon"],
-            "city": data["name"]
-        }
+        # weather_data = {
+        #     "temp": data["main"]["temp"],
+        #     "feels_like": data["main"]["feels_like"],
+        #     "description": data["weather"][0]["description"].title(),
+        #     "icon": data["weather"][0]["icon"],
+        #     "city": data["name"]
+        # }
 
-        return jsonify(weather_data)
+        return data;
 
     except requests.exceptions.RequestException as e:
         # Handle errors (e.g., API key wrong, network down)
