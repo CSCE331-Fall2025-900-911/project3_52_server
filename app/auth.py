@@ -4,6 +4,7 @@ import os
 from flask import Blueprint, jsonify, session, redirect, url_for
 from flask_dance.contrib.google import make_google_blueprint, google
 from .db import get_db_connection
+from .decorators import login_required
 
 # 1. Create the main auth blueprint
 auth_bp = Blueprint('auth', __name__, url_prefix='/api/auth')
@@ -35,6 +36,7 @@ def login():
 
 # This is the /api/auth/logout route
 @auth_bp.route('/logout')
+@login_required
 def logout():
     """Clears the user's session."""
     session.clear()

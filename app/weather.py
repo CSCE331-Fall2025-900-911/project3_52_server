@@ -1,6 +1,6 @@
 import os
 import requests
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, request  # <-- Import 'request'
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -9,26 +9,37 @@ weather_bp = Blueprint('weather', __name__, url_prefix='/api/weather')
 
 # Get your API key
 API_KEY = os.environ.get('OPENWEATHER_API_KEY')
-CITY = os.environ.get('CITY')
-STATE = os.environ.get('STATE')
-# We'll use College Station, TX. You can change this.
-CITY = "College Station"
-STATE = "TX"
-COUNTRY = "US"
+
+# Remove the old hard-coded location
+# CITY = "College Station"
+# STATE = "TX"
+# COUNTRY = "US"
 BASE_URL = "https://api.openweathermap.org/data/2.5/weather"
+
+# Default coordinates for College Station
+CSTAT_LAT = "30.6280"
+CSTAT_LON = "-96.3344"
 
 
 @weather_bp.route('/', methods=['GET'])
 def get_weather():
     """
     Fetches the current weather from the OpenWeatherMap API.
-    This is a secure endpoint; the API key never leaves the server.
+    It accepts 'lat' and 'lon' query parameters.
+    If they are missing, it defaults to College Station.
     """
     if not API_KEY:
         return jsonify({"error": "Weather API key not configured"}), 500
 
-    # Construct the full API URL
-    query_params = f"?q={CITY},{STATE},{COUNTRY}&appid={API_KEY}&units=imperial"
+    # --- THIS IS THE NEW LOGIC ---
+    # Get lat/lon from the request URL (e.g., /api/weather?lat=...&lon=...)
+    # If they aren't provided, use the CStat defaults
+    lat = request.args.get('lat', default=CSTAT_LAT)
+    lon = request.args.get('lon', default=CSTAT_LON)
+    # --- END NEW LOGIC ---
+
+    # Construct the full API URL using lat/lon
+    query_params = f"?lat={lat}&lon={lon}&appid={API_KEY}&units=imperial"
     full_url = BASE_URL + query_params
 
     try:
@@ -39,7 +50,6 @@ def get_weather():
         data = response.json()
 
         # Simplify the data to send to the frontend
-        # This is good practice! Only send what you need.
         weather_data = {
             "temp": data["main"]["temp"],
             "feels_like": data["main"]["feels_like"],
@@ -57,3 +67,4 @@ def get_weather():
     except KeyError:
         # Handle unexpected JSON structure
         return jsonify({"error": "Unexpected data format from weather API"}), 500
+

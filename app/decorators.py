@@ -31,3 +31,18 @@ def staff_required(f):
         return f(*args, **kwargs)
 
     return decorated_function
+
+
+def login_required(f):
+    """
+    Checks if a user is logged in (has any session).
+    """
+
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if "user_id" not in session:
+            return jsonify({"error": "Not authenticated. No user to log out."}), 401
+
+        return f(*args, **kwargs)
+
+    return decorated_function
