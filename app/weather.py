@@ -21,7 +21,7 @@ CSTAT_LAT = "30.6280"
 CSTAT_LON = "-96.3344"
 
 
-@weather_bp.route('/', methods=['GET'])
+@weather_bp.route('/', methods=['GET'], strict_slashes=False)
 def get_weather():
     """
     Fetches the current weather from the OpenWeatherMap API.
@@ -50,15 +50,15 @@ def get_weather():
         data = response.json()
 
         # Simplify the data to send to the frontend
-        # weather_data = {
-        #     "temp": data["main"]["temp"],
-        #     "feels_like": data["main"]["feels_like"],
-        #     "description": data["weather"][0]["description"].title(),
-        #     "icon": data["weather"][0]["icon"],
-        #     "city": data["name"]
-        # }
+        weather_data = {
+            "temp": data["main"]["temp"],
+            "feels_like": data["main"]["feels_like"],
+            "description": data["weather"][0]["description"].title(),
+            "icon": data["weather"][0]["icon"],
+            "city": data["name"]
+        }
 
-        return data;
+        return weather_data;
 
     except requests.exceptions.RequestException as e:
         # Handle errors (e.g., API key wrong, network down)

@@ -8,7 +8,7 @@ from .decorators import staff_required
 orders_bp = Blueprint('orders', __name__, url_prefix='/api')
 
 
-@orders_bp.route('/orders', methods=['GET'])
+@orders_bp.route('/orders', methods=['GET'], strict_slashes=False)
 @staff_required
 def get_orders():
     """ Function to get the last 1000 orders, most recent first. """
@@ -28,8 +28,7 @@ def get_orders():
         return jsonify({"error": str(e)}), 500
 
 
-@orders_bp.route('/orders', methods=['POST'])
-@staff_required
+@orders_bp.route('/orders', methods=['POST'], strict_slashes=False)
 def add_order():
     """ Function to add a new order. This is a TRANSACTION. """
     data = request.get_json()
@@ -86,8 +85,67 @@ def add_order():
         conn.rollback()
         return jsonify({"error": f"Transaction failed: {str(e)}"}), 500
 
+# ... (after the add_order function) ...
 
-@orders_bp.route('/items', methods=['GET'])
+@orders_bp.route('/orders/<int:order_id>', methods=['GET'], strict_slashes=False)
+@staff_required
+def get_order_by_id(order_id):
+    """
+    Function to get a single order by its ID, including all its items
+    and their product names.
+    """
+    conn = get_db_connection()
+    if conn is None:
+        return jsonify({"error": "Database connection failed"}), 500
+    try:
+        cur = conn.cursor()
+
+        # 1. Get the main order details
+        cur.execute('SELECT * FROM orders WHERE order_id = %s;', (order_id,))
+        order_row = cur.fetchone()
+
+        if order_row is None:
+            cur.close()
+            conn.close()
+            return jsonify({"error": "Order not found"}), 404
+
+        # Convert the order row to a dictionary
+        order_columns = [desc[0] for desc in cur.description]
+        order_details = dict(zip(order_columns, order_row))
+
+        # 2. Get all items for that order, joining with products to get product_name
+        # We use LEFT JOIN in case a product was somehow deleted
+        # but we still want to show the order item.
+        item_sql = """
+            SELECT i.*, p.product_name
+            FROM items i
+            LEFT JOIN products p ON i.product_id = p.product_id
+            WHERE i.order_id = %s
+            ORDER BY i.item_id;
+        """
+        cur.execute(item_sql, (order_id,))
+        item_rows = cur.fetchall()
+
+        # Convert item rows to a list of dictionaries
+        item_columns = [desc[0] for desc in cur.description]
+        order_items = [dict(zip(item_columns, row)) for row in item_rows]
+
+        # 3. Combine and return
+        # This matches what the frontend OrderDetailsModal expects:
+        # an order object with an 'items' key containing an array.
+        order_details['items'] = order_items
+
+        cur.close()
+        conn.close()
+        return jsonify(order_details)
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+# ... (keep the get_items function below this) ...
+
+@orders_bp.route('/items', methods=['GET'], strict_slashes=False)
 @staff_required
 def get_items():
     """ Function to get the last 1000 items, most recent first. """

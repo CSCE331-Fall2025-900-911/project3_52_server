@@ -8,7 +8,7 @@ from .decorators import manager_required# Import our shared db function
 products_bp = Blueprint('products', __name__, url_prefix='/api/products')
 
 
-@products_bp.route('/', methods=['GET'])
+@products_bp.route('/', methods=['GET'], strict_slashes=False)
 def get_products():
     """ Function to get all products (menu items). """
     conn = get_db_connection()
@@ -19,7 +19,14 @@ def get_products():
         cur.execute('SELECT * FROM products;')
         rows = cur.fetchall()
         columns = [desc[0] for desc in cur.description]
-        products = [dict(zip(columns, row)) for row in rows]
+        products = []
+        for row in rows:
+            product_dict = dict(zip(columns, row))
+            # Check if 'price' exists and is not None
+            if 'price' in product_dict and product_dict['price'] is not None:
+                # Cast Decimal to float so JSON serializes it as a number
+                product_dict['price'] = float(product_dict['price'])
+            products.append(product_dict)
         cur.close()
         conn.close()
         return jsonify(products)

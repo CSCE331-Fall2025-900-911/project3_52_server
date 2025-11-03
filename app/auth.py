@@ -25,7 +25,7 @@ google_bp = make_google_blueprint(
 
 
 # This is the /api/auth/login route
-@auth_bp.route('/login')
+@auth_bp.route('/login', strict_slashes=False)
 def login():
     """
     Redirects the user to the Google login page.
@@ -35,7 +35,7 @@ def login():
 
 
 # This is the /api/auth/logout route
-@auth_bp.route('/logout')
+@auth_bp.route('/logout', strict_slashes=False)
 @login_required
 def logout():
     """Clears the user's session."""
@@ -45,7 +45,7 @@ def logout():
 
 # This is the internal callback route that Flask-Dance will hit.
 # It is NOT the same as the /api/auth/google/callback we told Google.
-@auth_bp.route('/google/callback')
+@auth_bp.route('/google/callback', strict_slashes=False)
 def google_callback():
     """
     This is the route Google redirects to *after* the user logs in.
@@ -83,7 +83,7 @@ def google_callback():
             session["user_email"] = user_email
 
             # Redirect to the frontend's dashboard
-            return redirect("/api/auth/me")
+            return redirect("http://127.0.0.1:3000")
         else:
             # User is not in the staff table
             return jsonify({"error": "Access denied. This Google account is not associated with a staff member."}), 403
@@ -93,7 +93,7 @@ def google_callback():
 
 
 # This is an endpoint for your React app to check if a user is logged in
-@auth_bp.route("/me")
+@auth_bp.route("/me", strict_slashes=False)
 def get_current_user():
     """Gets the currently logged-in user from the session."""
     if "user_id" in session:

@@ -16,7 +16,8 @@ def get_inventory():
         return jsonify({"error": "Database connection failed"}), 500
     try:
         cur = conn.cursor()
-        cur.execute('SELECT * FROM inventory;')
+        # This aliases numservings to numServings
+        cur.execute('SELECT inv_item_id, name, units_remaining, numservings AS "numServings" FROM inventory;')
         rows = cur.fetchall()
         columns = [desc[0] for desc in cur.description]
         inventory = [dict(zip(columns, row)) for row in rows]  # Fixed variable name
@@ -30,13 +31,25 @@ def get_inventory():
 @inventory_bp.route('/inventory/<int:inv_item_id>', methods=['PUT'])
 @manager_required
 def update_inventory(inv_item_id):
-    """ Function to update an inventory item using its inv_item_id. """
+    """ Function to update an inventory item's stock levels using its inv_item_id. """
     data = request.get_json()
     try:
-        name = data.get('name')
+        # --- START FIX ---
+
+        # We only care about stock levels in this route
         units_remaining = data.get('units_remaining')
-        if not name or units_remaining is None:
-            return jsonify({"error": "name and units_remaining are required"}), 400
+        numServings = data.get('numServings')
+
+        # Updated validation: Check for units_remaining and numServings
+        if units_remaining is None or numServings is None:
+            return jsonify({"error": "units_remaining and numServings are required"}), 400
+
+        # Optional: Check if they are valid numbers (though parseFloat on frontend helps)
+        if not isinstance(units_remaining, (int, float)) or not isinstance(numServings, (int, float)):
+            return jsonify({"error": "Stock levels must be numbers"}), 400
+
+        # --- END FIX ---
+
     except Exception as e:
         return jsonify({"error": "Invalid JSON data", "details": str(e)}), 400
 
@@ -45,20 +58,40 @@ def update_inventory(inv_item_id):
         return jsonify({"error": "Database connection failed"}), 500
     try:
         cur = conn.cursor()
-        sql_query = "UPDATE inventory SET name = %s, units_remaining = %s, numServings = %s WHERE inv_item_id = %s"
-        values = (name, units_remaining, data.get('numServings'), inv_item_id)
+
+        # --- START FIX 2 ---
+
+        # Updated SQL query: Do NOT update the name
+        sql_query = "UPDATE inventory SET units_remaining = %s, numServings = %s WHERE inv_item_id = %s"
+        values = (units_remaining, numServings, inv_item_id)
+
+        # --- END FIX 2 ---
+
         cur.execute(sql_query, values)
         conn.commit()
 
         rowcount = cur.rowcount
+
+        if rowcount == 0:
+            cur.close()
+            conn.close()
+            return jsonify({"error": "Inventory item not found"}), 404
+
+
+        cur.execute("SELECT * FROM inventory WHERE inv_item_id = %s", (inv_item_id,))
+        columns = [desc[0] for desc in cur.description]
+        updated_item = dict(zip(columns, cur.fetchone()))
+
         cur.close()
         conn.close()
 
-        if rowcount == 0:
-            return jsonify({"error": "Inventory item not found"}), 404
-        return jsonify({"message": f"Inventory item {inv_item_id} updated successfully"})
+        return jsonify(updated_item)  # Return the full object
+
+
     except Exception as e:
         conn.rollback()
+        cur.close()
+        conn.close()
         return jsonify({"error": str(e)}), 500
 
 

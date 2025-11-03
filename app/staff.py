@@ -7,7 +7,7 @@ from .decorators import manager_required
 staff_bp = Blueprint('staff', __name__, url_prefix='/api/staff')
 
 
-@staff_bp.route('/', methods=['GET'])
+@staff_bp.route('/', methods=['GET'], strict_slashes=False)
 @manager_required
 def get_staff():
     """ Function to get all staff members. """
@@ -27,7 +27,7 @@ def get_staff():
         return jsonify({"error": str(e)}), 500
 
 
-@staff_bp.route('/', methods=['POST'])
+@staff_bp.route('/', methods=['POST'], strict_slashes=False)
 @manager_required
 def add_employee():
     """ Function to add a new employee. """
@@ -36,6 +36,7 @@ def add_employee():
         staff_id = data.get('staff_id')
         name = data.get('name')
         role = data.get('role')
+        email = data.get('email')
         if not staff_id or not name or not role:
             return jsonify({"error": "staff_id, name, and role are required"}), 400
     except Exception as e:
@@ -46,10 +47,10 @@ def add_employee():
         return jsonify({"error": "Database connection failed"}), 500
     try:
         cur = conn.cursor()
-        sql_query = "INSERT INTO staff (staff_id, name, role, salary, hours_worked) VALUES (%s, %s, %s, %s, %s)"
+        sql_query = "INSERT INTO staff (staff_id, name, role, salary, hours_worked, email) VALUES (%s, %s, %s, %s, %s, %s)"
         values = (
             staff_id, name, role,
-            data.get('salary'), data.get('hours_worked')
+            data.get('salary'), data.get('hours_worked'),email
         )
         cur.execute(sql_query, values)
         conn.commit()
@@ -61,7 +62,7 @@ def add_employee():
         return jsonify({"error": str(e)}), 500
 
 
-@staff_bp.route('/<string:staff_id>', methods=['PUT'])
+@staff_bp.route('/<string:staff_id>', methods=['PUT'], strict_slashes=False)
 @manager_required
 def update_employee(staff_id):
     """ Function to update an existing employee's details. """
@@ -69,6 +70,7 @@ def update_employee(staff_id):
     try:
         name = data.get('name')
         role = data.get('role')
+        email = data.get('email')
         if not name or not role:
             return jsonify({"error": "name and role are required"}), 400
     except Exception as e:
@@ -79,10 +81,10 @@ def update_employee(staff_id):
         return jsonify({"error": "Database connection failed"}), 500
     try:
         cur = conn.cursor()
-        sql_query = "UPDATE staff SET name = %s, role = %s, salary = %s, hours_worked = %s WHERE staff_id = %s"
+        sql_query = "UPDATE staff SET name = %s, role = %s, salary = %s, hours_worked = %s, email = %s WHERE staff_id = %s"
         values = (
             name, role, data.get('salary'),
-            data.get('hours_worked'), staff_id
+            data.get('hours_worked'),email, staff_id
         )
         cur.execute(sql_query, values)
         conn.commit()
@@ -99,7 +101,7 @@ def update_employee(staff_id):
         return jsonify({"error": str(e)}), 500
 
 
-@staff_bp.route('/<string:staff_id>', methods=['DELETE'])
+@staff_bp.route('/<string:staff_id>', methods=['DELETE'], strict_slashes=False)
 @manager_required
 def remove_employee(staff_id):
     """ Function to remove an employee using their staff_id. """
