@@ -34,6 +34,12 @@ def create_app():
     from . import staff
     app.register_blueprint(staff.staff_bp)
 
+    from . import weather
+    app.register_blueprint(weather.weather_bp)
+
+    from . import translate
+    app.register_blueprint(translate.translate_bp)
+
     # --- New Auth Blueprint ---
     from . import auth
     # Register the main /api/auth blueprint
