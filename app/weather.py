@@ -17,8 +17,8 @@ API_KEY = os.environ.get('OPENWEATHER_API_KEY')
 BASE_URL = "https://api.openweathermap.org/data/2.5/weather"
 
 # Default coordinates for College Station
-CSTAT_LAT = "30.6280"
-CSTAT_LON = "-96.3344"
+CSTAT_LAT = "32.05"
+CSTAT_LON = "118.80"
 
 
 @weather_bp.route('/', methods=['GET'], strict_slashes=False)

@@ -86,7 +86,7 @@ def google_callback():
             return redirect("http://127.0.0.1:3000")
         else:
             # User is not in the staff table
-            return jsonify({"error": "Access denied. This Google account is not associated with a staff member."}), 403
+            return redirect("http://127.0.0.1:3000")
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
