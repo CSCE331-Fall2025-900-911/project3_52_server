@@ -84,9 +84,7 @@ GOOGLE_TRANSLATE_API_KEY=YOUR_GOOGLE_TRANSLATE_API_KEY
 
 ### C. Sync Database Sequences
 
-The data for this project was imported using `\copy`, which does **not** update the SERIAL counters for new IDs. This will cause "duplicate key" errors.
-
-You must run this one-time fix on the PostgreSQL database before running the server:
+You might need to run this one-time fix on the PostgreSQL database before running the server:
 
 ```sql
 SELECT setval(pg_get_serial_sequence('products', 'product_id'), COALESCE(MAX(product_id), 1)) FROM products;
