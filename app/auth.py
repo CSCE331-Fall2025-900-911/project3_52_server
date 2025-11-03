@@ -81,7 +81,7 @@ def google_callback():
             session["user_email"] = user_email
 
             # Redirect to the frontend's dashboard
-            return redirect("http://127.0.0.1:5000/api/auth/me")
+            return redirect("/api/auth/me")
         else:
             # User is not in the staff table
             return jsonify({"error": "Access denied. This Google account is not associated with a staff member."}), 403
