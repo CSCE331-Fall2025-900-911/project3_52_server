@@ -18,7 +18,7 @@ def get_inventory():
     try:
         cur = conn.cursor()
         # This aliases numservings to numServings
-        cur.execute('SELECT inv_item_id, name, units_remaining, numservings AS "numServings" FROM inventory;')
+        cur.execute('SELECT inv_item_id, name, units_remaining, numservings AS "numServings" FROM inventory order by inv_item_id asc;')
         rows = cur.fetchall()
         columns = [desc[0] for desc in cur.description]
         inventory = [dict(zip(columns, row)) for row in rows]  # Fixed variable name

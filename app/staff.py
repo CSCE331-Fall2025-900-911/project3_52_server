@@ -16,7 +16,7 @@ def get_staff():
         return jsonify({"error": "Database connection failed"}), 500
     try:
         cur = conn.cursor()
-        cur.execute('SELECT * FROM staff;')
+        cur.execute('SELECT * FROM staff order by staff_id asc;')
         rows = cur.fetchall()
         columns = [desc[0] for desc in cur.description]
         staff = [dict(zip(columns, row)) for row in rows]  # Fixed variable name

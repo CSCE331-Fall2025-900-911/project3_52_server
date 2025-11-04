@@ -16,7 +16,7 @@ def get_products():
         return jsonify({"error": "Database connection failed"}), 500
     try:
         cur = conn.cursor()
-        cur.execute('SELECT * FROM products;')
+        cur.execute('SELECT * FROM products order by product_id asc;')
         rows = cur.fetchall()
         columns = [desc[0] for desc in cur.description]
         products = []
