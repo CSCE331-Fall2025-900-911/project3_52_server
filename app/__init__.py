@@ -1,5 +1,5 @@
 import os
-from flask import Flask, jsonify, session
+from flask import Flask, jsonify, session, send_from_directory  # 1. Import send_from_directory
 from flask_cors import CORS
 from dotenv import load_dotenv
 from flask_session import Session
@@ -8,7 +8,11 @@ from flask_session import Session
 def create_app():
     load_dotenv()
 
-    app = Flask(__name__)
+    app = Flask(
+        __name__,
+        static_folder='../build/static',  # This is correct
+        template_folder='../build'  # This is correct
+    )
 
     # --- Session Config ---
     app.config["SECRET_KEY"] = os.environ.get("FLASK_SECRET_KEY")
@@ -16,21 +20,27 @@ def create_app():
     app.config["SESSION_PERMANENT"] = True
     Session(app)
 
-    # --- THIS IS THE CORS FIX ---
-    # This configuration explicitly allows your React app (running on localhost:3000)
-    # to make requests and send/receive cookies.
-    app.config['SESSION_COOKIE_SECURE'] = True  # 1. Must be sent over HTTPS
-    app.config['SESSION_COOKIE_SAMESITE'] = 'None'  # 2. Allow cross-domain
+    # ---
+    # 2. (CRITICAL) REMOVE CROSS-ORIGIN COOKIE SETTINGS
+    # You are now a "same-site" app. Using 'None' will break login.
+    # The default 'Lax' is what you want.
+    # ---
+    # app.config['SESSION_COOKIE_SECURE'] = True  <-- DELETE
+    # app.config['SESSION_COOKIE_SAMESITE'] = 'None'  <-- DELETE
+
+    # ---
+    # 3. Simplify CORS
+    # This is now *only* for local development. It's not used in production.
+    # ---
     CORS(
         app,
-        # Add all origins your React app might run on
-        origins=["http://localhost:3000", "http://127.0.0.1:3000", "https://project3-52.vercel.app", "https://project3-52-git-main-aarons-projects-cc110603.vercel.app"
-                 ,"https://project3-52-q917vdn6q-aarons-projects-cc110603.vercel.app"],
+        origins=["http://localhost:3000", "http://127.0.0.1:3000"],
         supports_credentials=True
     )
     # --- END FIX ---
 
     # --- Register Blueprints ---
+    # (Your blueprints are all correct)
     from . import products
     app.register_blueprint(products.products_bp)
 
@@ -53,10 +63,26 @@ def create_app():
     from . import translate
     app.register_blueprint(translate.translate_bp)
 
-    @app.route('/',strict_slashes=False)
-    def home():
-        """A simple health-check route to see if the server is running."""
-        return "TeaFlow API is running!"
+    # ---
+    # 4. (CRITICAL) ADD CATCH-ALL ROUTE TO SERVE REACT
+    # This must be *after* your API blueprints.
+    # ---
+    @app.route('/', defaults={'path': ''}, strict_slashes=False)
+    @app.route('/<path:path>', strict_slashes=False)
+    def serve_react_app(path):
+        # Your API routes are handled by blueprints, so this check is a safeguard
+        if path.startswith("api/"):
+            return "API route not found", 404
 
-    return app
+        # If the path is a file in the build folder, serve it
+        if path != "" and os.path.exists(os.path.join(app.template_folder, path)):
+            return send_from_directory(app.template_folder, path)
 
+        # Otherwise, serve the main index.html (React will handle the page)
+        else:
+            return send_from_directory(app.template_folder, 'index.html')
+
+    # ---
+    # 5. (CRITICAL) FIX THE RETURN STATEMENT
+    # ---
+    return app  # Was 'return' before

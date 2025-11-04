@@ -85,10 +85,10 @@ def google_callback():
             session["user_email"] = user_email
 
             # Redirect to the frontend's dashboard
-            return redirect(FRONTEND_URL)
+            return redirect("/")
         else:
             # User is not in the staff table
-            return redirect(FRONTEND_URL)
+            return redirect("/")
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
