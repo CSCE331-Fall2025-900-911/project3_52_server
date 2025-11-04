@@ -19,6 +19,8 @@ def create_app():
     # --- THIS IS THE CORS FIX ---
     # This configuration explicitly allows your React app (running on localhost:3000)
     # to make requests and send/receive cookies.
+    app.config['SESSION_COOKIE_SECURE'] = True  # 1. Must be sent over HTTPS
+    app.config['SESSION_COOKIE_SAMESITE'] = 'None'  # 2. Allow cross-domain
     CORS(
         app,
         # Add all origins your React app might run on
