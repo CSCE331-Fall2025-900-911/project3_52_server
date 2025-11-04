@@ -11,19 +11,38 @@ orders_bp = Blueprint('orders', __name__, url_prefix='/api')
 @orders_bp.route('/orders', methods=['GET'], strict_slashes=False)
 @staff_required
 def get_orders():
-    """ Function to get the last 1000 orders, most recent first. """
+    """Function to get paginated orders."""
     conn = get_db_connection()
     if conn is None:
         return jsonify({"error": "Database connection failed"}), 500
+
     try:
+        limit = int(request.args.get("limit", 50))
+        offset = int(request.args.get("offset", 0))
+
         cur = conn.cursor()
-        cur.execute('SELECT * FROM orders ORDER BY order_id DESC LIMIT 1000;')
+        # 1️⃣ Get paginated data
+        cur.execute(
+            "SELECT * FROM orders ORDER BY order_id DESC LIMIT %s OFFSET %s;",
+            (limit, offset)
+        )
         rows = cur.fetchall()
         columns = [desc[0] for desc in cur.description]
-        orders = [dict(zip(columns, row)) for row in rows] # Fixed variable name
+        orders = [dict(zip(columns, row)) for row in rows]
+
+        # 2️⃣ Get total count of all orders (for pagination)
+        cur.execute("SELECT COUNT(*) FROM orders;")
+        total_count = cur.fetchone()[0]
+
         cur.close()
         conn.close()
-        return jsonify(orders)
+
+        return jsonify({
+            "orders": orders,
+            "count": total_count,
+            "limit": limit,
+            "offset": offset
+        })
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
