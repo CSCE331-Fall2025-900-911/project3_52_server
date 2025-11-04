@@ -22,7 +22,8 @@ def create_app():
     CORS(
         app,
         # Add all origins your React app might run on
-        origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+        origins=["http://localhost:3000", "http://127.0.0.1:3000", "https://project3-52.vercel.app", "https://project3-52-git-main-aarons-projects-cc110603.vercel.app"
+                 ,"https://project3-52-q917vdn6q-aarons-projects-cc110603.vercel.app"],
         supports_credentials=True
     )
     # --- END FIX ---

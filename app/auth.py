@@ -51,6 +51,8 @@ def google_callback():
     This is the route Google redirects to *after* the user logs in.
     Flask-Dance handles the token exchange.
     """
+    FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://127.0.0.1:3000")
+
     if not google.authorized:
         return jsonify({"error": "Login failed."}), 401
 
@@ -83,10 +85,10 @@ def google_callback():
             session["user_email"] = user_email
 
             # Redirect to the frontend's dashboard
-            return redirect("http://127.0.0.1:3000")
+            return redirect(FRONTEND_URL)
         else:
             # User is not in the staff table
-            return redirect("http://127.0.0.1:3000")
+            return redirect(FRONTEND_URL)
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
