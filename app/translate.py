@@ -23,7 +23,7 @@ API_KEY = os.environ.get('GOOGLE_TRANSLATE_API_KEY')
 BASE_URL = "https://translation.googleapis.com/language/translate/v2"
 
 
-@translate_bp.route('/', methods=['POST'])
+@translate_bp.route('/', methods=['POST'], strict_slashes=False)
 def handle_translate():
     """
     Fetches a translation from the Google Translate API.
