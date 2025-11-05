@@ -63,10 +63,18 @@ def create_app():
     from . import translate
     app.register_blueprint(translate.translate_bp)
 
-    # ---
-    # 4. (CRITICAL) ADD CATCH-ALL ROUTE TO SERVE REACT
-    # This must be *after* your API blueprints.
-    # ---
+    @app.route('/favicon.ico')
+    def favicon():
+        return send_from_directory(app.template_folder, 'favicon.ico')
+
+    @app.route('/logo192.png')
+    def logo192():
+        return send_from_directory(app.template_folder, 'logo192.png')
+
+    @app.route('/manifest.json')
+    def manifest():
+        return send_from_directory(app.template_folder, 'manifest.json')
+
     @app.route('/', defaults={'path': ''}, strict_slashes=False)
     @app.route('/<path:path>', strict_slashes=False)
     def serve_react_app(path):
