@@ -66,6 +66,9 @@ def create_app():
     from . import payments
     app.register_blueprint(payments.payments_bp)
 
+    from . import paypal
+    app.register_blueprint(paypal.paypal_bp)
+
     @app.route('/favicon.ico')
     def favicon():
         return send_from_directory(os.path.join(app.template_folder), 'favicon.ico')
