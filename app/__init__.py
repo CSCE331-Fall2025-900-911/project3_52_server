@@ -63,6 +63,9 @@ def create_app():
     from . import translate
     app.register_blueprint(translate.translate_bp)
 
+    from . import payments
+    app.register_blueprint(payments.payments_bp)
+
     @app.route('/favicon.ico')
     def favicon():
         return send_from_directory(os.path.join(app.template_folder), 'favicon.ico')
