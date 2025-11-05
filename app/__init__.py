@@ -65,15 +65,23 @@ def create_app():
 
     @app.route('/favicon.ico')
     def favicon():
-        return send_from_directory(app.template_folder, 'favicon.ico')
-
-    @app.route('/logo192.png')
-    def logo192():
-        return send_from_directory(app.template_folder, 'logo192.png')
+        return send_from_directory(os.path.join(app.template_folder), 'favicon.ico')
 
     @app.route('/manifest.json')
     def manifest():
-        return send_from_directory(app.template_folder, 'manifest.json')
+        return send_from_directory(os.path.join(app.template_folder), 'manifest.json')
+
+    @app.route('/android-chrome-192x192.png')
+    def android_chrome_192():
+        return send_from_directory(os.path.join(app.template_folder), 'android-chrome-192x192.png')
+
+    @app.route('/android-chrome-512x512.png')
+    def android_chrome_512():
+        return send_from_directory(os.path.join(app.template_folder), 'android-chrome-512x512.png')
+
+    @app.route('/apple-touch-icon.png')
+    def apple_touch_icon():
+        return send_from_directory(os.path.join(app.template_folder), 'apple-touch-icon.png')
 
     @app.route('/', defaults={'path': ''}, strict_slashes=False)
     @app.route('/<path:path>', strict_slashes=False)
