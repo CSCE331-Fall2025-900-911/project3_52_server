@@ -69,6 +69,10 @@ def create_app():
     from . import paypal
     app.register_blueprint(paypal.paypal_bp)
 
+    @app.route('/music.mp3')
+    def music():
+        return send_from_directory(os.path.join(app.template_folder), 'music.mp3')
+
     @app.route('/favicon.ico')
     def favicon():
         return send_from_directory(os.path.join(app.template_folder), 'favicon.ico')
