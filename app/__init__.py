@@ -25,8 +25,8 @@ def create_app():
     # You are now a "same-site" app. Using 'None' will break login.
     # The default 'Lax' is what you want.
     # ---
-    # app.config['SESSION_COOKIE_SECURE'] = True  <-- DELETE
-    # app.config['SESSION_COOKIE_SAMESITE'] = 'None'  <-- DELETE
+    app.config['SESSION_COOKIE_SECURE'] = True
+    app.config['SESSION_COOKIE_SAMESITE'] = 'None'
 
     # ---
     # 3. Simplify CORS
@@ -34,7 +34,7 @@ def create_app():
     # ---
     CORS(
         app,
-        origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+        origins=["http://localhost:3000", "http://127.0.0.1:3000", "https://project3-52.vercel.app"],
         supports_credentials=True
     )
     # --- END FIX ---
