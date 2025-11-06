@@ -20,13 +20,6 @@ def create_app():
     app.config["SESSION_PERMANENT"] = True
     Session(app)
 
-    # ---
-    # 2. (CRITICAL) REMOVE CROSS-ORIGIN COOKIE SETTINGS
-    # You are now a "same-site" app. Using 'None' will break login.
-    # The default 'Lax' is what you want.
-    # ---
-    app.config['SESSION_COOKIE_SECURE'] = True
-    app.config['SESSION_COOKIE_SAMESITE'] = 'None'
 
     # ---
     # 3. Simplify CORS
