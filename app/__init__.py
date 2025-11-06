@@ -34,7 +34,7 @@ def create_app():
     # ---
     CORS(
         app,
-        origins=["http://localhost:3000", "http://127.0.0.1:3000", "https://project3-52.vercel.app, https://momtea-pos.shop"],
+        origins=["http://localhost:3000", "http://127.0.0.1:3000", "https://project3-52.vercel.app", "https://www.momtea-pos.shop", "https://momtea-pos.shop"],
         supports_credentials=True
     )
     # --- END FIX ---
