@@ -8,7 +8,7 @@ The server provides a secure, role-based API for managing products, inventory, s
 
 ## Tech Stacks
 - **Flask**
-- **Google Oauth**
+- **Google OAuth 2.0**
 - **Google Translate Api**
 - **Stripe & PayPal SDKs** for payment integration
 - **Openweather Api**
