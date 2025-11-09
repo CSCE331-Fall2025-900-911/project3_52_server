@@ -101,7 +101,4 @@ def create_app():
         else:
             return send_from_directory(app.template_folder, 'index.html')
 
-    # ---
-    # 5. (CRITICAL) FIX THE RETURN STATEMENT
-    # ---
-    return app  # Was 'return' before
+    return app

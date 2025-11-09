@@ -1,8 +1,17 @@
-# TeaFlow API Server
+# MomTea POS API Server
 
 This is the complete backend server for the TeaFlow Point-of-Sale system. It is built with Python (Flask) and connects to a PostgreSQL database.
 
 The server provides a secure, role-based API for managing products, inventory, staff, and orders, and also integrates with Google OAuth2, Google Translate, and OpenWeatherMap.
+
+---
+
+## Tech Stacks
+-**Flask**
+-**Google Oauth**
+-**Google Translate Api**
+-**Stripe & PayPal SDKs** for payment integration
+-**Openweather Api**
 
 ---
 
@@ -80,6 +89,12 @@ OAUTHLIB_INSECURE_TRANSPORT=1
 # --- 3rd Party API Keys ---
 OPENWEATHER_API_KEY=YOUR_OPENWEATHER_API_KEY
 GOOGLE_TRANSLATE_API_KEY=YOUR_GOOGLE_TRANSLATE_API_KEY
+PAYPAL_CLIENT_ID=YOUR_PAYPAL_CLIENT_ID
+PAYPAL_SECRET=YOUR_PAYPAL_SECRET
+PAYPAL_API_BASE=https://api-m.sandbox.paypal.com
+
+# --- Frontend URL for Google Oauth Redirect
+FRONTEND_URL=YOUR_FRONTEND_URL
 ```
 
 ### C. Sync Database Sequences
@@ -145,13 +160,3 @@ To test protected routes, you must authenticate as a staff member. This flow mus
 2. Go to the **Application** tab.
 3. Find **Cookies > http://localhost:5000**.
 4. Copy the **Value** of the cookie named `session`.
-
-#### Test (Postman):
-
-1. Import the `TeaFlow_API.postman_collection.json` file into Postman.
-2. Open a protected request (e.g., `POST /api/products` or `GET /api/staff`).
-3. Go to the **Headers** tab.
-4. Add a new header:
-   - **Key:** `Cookie`
-   - **Value:** `session=PASTE_YOUR_COOKIE_VALUE_HERE`
-5. Send the request. It will now succeed.
