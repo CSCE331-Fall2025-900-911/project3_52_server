@@ -44,7 +44,6 @@ def logout():
 
 
 # This is the internal callback route that Flask-Dance will hit.
-# It is NOT the same as the /api/auth/google/callback we told Google.
 @auth_bp.route('/google/callback', strict_slashes=False)
 def google_callback():
     """
