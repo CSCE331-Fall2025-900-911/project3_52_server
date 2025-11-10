@@ -2,7 +2,7 @@
 
 from flask import Blueprint, jsonify, request
 from .db import get_db_connection
-from .decorators import manager_required# Import our shared db function
+from .decorators import manager_required # Import our shared db function
 
 # Define the blueprint
 products_bp = Blueprint('products', __name__, url_prefix='/api/products')

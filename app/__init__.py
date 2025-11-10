@@ -46,6 +46,9 @@ def create_app():
     from . import staff
     app.register_blueprint(staff.staff_bp)
 
+    from . import dashboard
+    app.register_blueprint(dashboard.dashboard_bp)
+
     from . import auth
     app.register_blueprint(auth.auth_bp)
     app.register_blueprint(auth.google_bp, url_prefix='/api/auth')
@@ -61,6 +64,7 @@ def create_app():
 
     from . import paypal
     app.register_blueprint(paypal.paypal_bp)
+
 
     @app.route('/music.mp3')
     def music():
