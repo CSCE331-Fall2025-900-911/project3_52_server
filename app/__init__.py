@@ -68,7 +68,9 @@ def create_app():
     from . import reports
     app.register_blueprint(reports.reports_bp)
 
-
+    @app.route("/health")
+    def health():
+        return "OK", 200
 
     @app.route('/music.mp3')
     def music():
