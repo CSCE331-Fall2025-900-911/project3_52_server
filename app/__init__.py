@@ -64,6 +64,10 @@ def create_app():
 
     from . import paypal
     app.register_blueprint(paypal.paypal_bp)
+    
+    from . import reports
+    app.register_blueprint(reports.reports_bp)
+
 
 
     @app.route('/music.mp3')
