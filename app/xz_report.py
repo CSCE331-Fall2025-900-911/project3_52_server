@@ -1,14 +1,12 @@
 # app/xz_report.py
 from datetime import datetime
-from app.db import get_db_connection
+from .db import get_db_connection
 import pytz
 
 ORDER_TS_SQL = """
-  (
-    to_timestamp(
-      concat(year,'-',lpad(month::text,2,'0'),'-',lpad(day::text,2,'0'),' ', time::text),
-      'YYYY-MM-DD HH24:MI:SS'
-    ) AT TIME ZONE 'America/Chicago'
+  to_timestamp(
+    concat(year,'-',lpad(month::text,2,'0'),'-',lpad(day::text,2,'0'),' ', time::text),
+    'YYYY-MM-DD HH24:MI:SS'
   )
 """
 
