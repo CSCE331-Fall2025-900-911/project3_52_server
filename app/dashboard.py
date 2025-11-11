@@ -19,6 +19,8 @@ def get_dashboard_stats():
     try:
         cur = conn.cursor()
 
+        cur.execute("SET TIME ZONE 'America/Chicago';")
+        
         # ========================================
         # 1. REVENUE: Last 30 Days (Line Chart)
         # ========================================
