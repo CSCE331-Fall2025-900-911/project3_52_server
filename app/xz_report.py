@@ -40,6 +40,26 @@ def _get_start_time(conn):
     return start_time, last_z
 
 
+def _get_z_start_time(conn):
+    """Return start time for Z reports:
+       - always start from last Z timestamp if exists
+       - else start from today's midnight
+       Note: Z reports do NOT start from midnight if last Z exists, regardless of date.
+    """
+    central = pytz.timezone("America/Chicago")
+    now = datetime.now(central)
+    last_z = _get_last_z_timestamp(conn)
+    midnight_today = datetime.combine(now.date(), datetime.min.time())
+
+    if last_z:
+        # Always start from last Z timestamp if it exists
+        start_time = last_z
+    else:
+        # No last Z timestamp → start from midnight
+        start_time = midnight_today
+
+    return start_time, last_z
+
 
 def x_report_today():
     """X report: totals since midnight or last Z if earlier."""
@@ -92,6 +112,7 @@ def x_report_today():
             ]
 
             return {
+                "start_time": start_time.strftime("%Y-%m-%d %H:%M:%S"),
                 "summary": {
                     "total_orders": int(total_orders or 0),
                     "total_revenue": float(total_revenue or 0),
@@ -105,13 +126,15 @@ def x_report_today():
 
 
 def z_report_preview():
-    """Preview Z report since last Z or midnight."""
+    """Preview Z report since last Z or midnight.
+       Note: Z reports always start from last Z timestamp, not midnight, if last Z exists.
+    """
     conn = get_db_connection()
     if not conn:
         return {"summary": {}, "by_payment": [], "last_z": None}
 
     try:
-        start_time, last_z = _get_start_time(conn)
+        start_time, last_z = _get_z_start_time(conn)
         with conn.cursor() as cur:
             # Summary
             cur.execute(f"""
@@ -154,13 +177,15 @@ def z_report_preview():
 
 
 def z_report_close():
-    """Close Z report for today and update last_ts in the database."""
+    """Close Z report for today and update last_ts in the database.
+       Note: Z reports always start from last Z timestamp, not midnight, if last Z exists.
+    """
     conn = get_db_connection()
     if not conn:
         return {"closed_at": None, "summary": {}, "by_payment": []}
 
     try:
-        start_time, last_z = _get_start_time(conn)
+        start_time, last_z = _get_z_start_time(conn)
 
         with conn.cursor() as cur:
             # Compute totals for the range

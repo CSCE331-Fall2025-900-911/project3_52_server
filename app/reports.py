@@ -34,21 +34,18 @@ def z_status_route():
         """)
         row = cur.fetchone()
 
-        central = pytz.timezone("America/Chicago")
-        now_local = datetime.now(central)
         z_closed_today = False
+        closed_at = None
 
         if row and row[0]:
             last_ts = row[0]
-            if last_ts.tzinfo is None:
-                last_ts = pytz.utc.localize(last_ts)
-            last_local = last_ts.astimezone(central)
-            if last_local.date() == now_local.date():
+            if last_ts.date() == datetime.now().date():
                 z_closed_today = True
+                closed_at = last_ts.strftime("%Y-%m-%d %H:%M:%S")
 
         cur.close()
         conn.close()
-        return jsonify({"success": True, "z_closed_today": z_closed_today})
+        return jsonify({"success": True, "z_closed_today": z_closed_today, "closed_at": closed_at})
 
     except Exception as e:
         if conn:
