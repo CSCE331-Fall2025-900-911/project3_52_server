@@ -6,6 +6,7 @@ from .xz_report import x_report_today, z_report_preview, z_report_close
 from .db import get_db_connection  # ✅ Import your connection function
 
 reports_bp = Blueprint("reports", __name__, url_prefix="/api/reports")
+chicago_tz = pytz.timezone("America/Chicago")
 
 
 @reports_bp.route("/x", methods=["GET"])
@@ -27,10 +28,8 @@ def z_status_route():
     try:
         cur = conn.cursor()
         cur.execute("""
-            SELECT last_ts 
+            SELECT * 
             FROM lastzreport 
-            ORDER BY last_ts DESC 
-            LIMIT 1;
         """)
         row = cur.fetchone()
 
@@ -39,7 +38,7 @@ def z_status_route():
 
         if row and row[0]:
             last_ts = row[0]
-            if last_ts.date() == datetime.now().date():
+            if last_ts.date() == datetime.now(chicago_tz).date():
                 z_closed_today = True
                 closed_at = last_ts.strftime("%Y-%m-%d %H:%M:%S")
 
