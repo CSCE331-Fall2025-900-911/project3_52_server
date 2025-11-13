@@ -2,10 +2,11 @@
 from flask import Blueprint, jsonify
 from datetime import datetime
 import pytz
-from app.xz_report import x_report_today, z_report_preview, z_report_close
-from app.db import get_db_connection  # ✅ Import your connection function
+from .xz_report import x_report_today, z_report_preview, z_report_close
+from .db import get_db_connection  # ✅ Import your connection function
 
 reports_bp = Blueprint("reports", __name__, url_prefix="/api/reports")
+chicago_tz = pytz.timezone("America/Chicago")
 
 
 @reports_bp.route("/x", methods=["GET"])
@@ -13,9 +14,42 @@ def x_report_route():
     return jsonify(x_report_today())
 
 
+
 @reports_bp.route("/z/preview", methods=["GET"])
 def z_preview_route():
     return jsonify(z_report_preview())
+
+@reports_bp.route("/z/status", methods=["GET"])
+def z_status_route():
+    """Check whether a Z-report has been run today."""
+    conn = get_db_connection()
+    if not conn:
+        return jsonify({"success": False, "error": "Database connection failed"}), 500
+    try:
+        cur = conn.cursor()
+        cur.execute("""
+            SELECT * 
+            FROM lastzreport 
+        """)
+        row = cur.fetchone()
+
+        z_closed_today = False
+        closed_at = None
+
+        if row and row[0]:
+            last_ts = row[0]
+            if last_ts.date() == datetime.now(chicago_tz).date():
+                z_closed_today = True
+                closed_at = last_ts.strftime("%Y-%m-%d %H:%M:%S")
+
+        cur.close()
+        conn.close()
+        return jsonify({"success": True, "z_closed_today": z_closed_today, "closed_at": closed_at})
+
+    except Exception as e:
+        if conn:
+            conn.close()
+        return jsonify({"success": False, "error": str(e)}), 500
 
 
 @reports_bp.route("/z/close", methods=["POST"])
