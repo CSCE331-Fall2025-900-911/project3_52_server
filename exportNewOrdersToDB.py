@@ -48,6 +48,13 @@ try:
     print('Notes: (the DELETE command cascades to all tables that use order as a Foreign Key)')
     print('\n\n## WARNING ## IF YOU REPEAT THIS PROCESS MULTIPLE TIMES, IT MAY DELETE ALL OLD DATA\n\n')
 
+    cur.execute("""
+            SELECT setval(pg_get_serial_sequence('products', 'product_id'), COALESCE(MAX(product_id), 1)) FROM products;
+            SELECT setval(pg_get_serial_sequence('orders', 'order_id'), COALESCE(MAX(order_id), 1)) FROM orders;
+            SELECT setval(pg_get_serial_sequence('items', 'item_id'), COALESCE(MAX(item_id), 1)) FROM items;
+            SELECT setval(pg_get_serial_sequence('inventory', 'inv_item_id'), COALESCE(MAX(inv_item_id), 1)) FROM inventory;
+        """)
+
 except Exception as e:
     print(f"Error importing data: {e}")
     print('Import rolled back...')
