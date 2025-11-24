@@ -33,14 +33,48 @@ def z_status_route():
         """)
         row = cur.fetchone()
 
+        # Handle missing or future timestamp
+        now_local = datetime.now(chicago_tz)
+
+        if not row or not row[0]:
+            # No timestamp exists — insert current Chicago time
+            cur.execute("UPDATE lastzreport SET last_ts = %s", (now_local,))
+            conn.commit()
+            cur.close()
+            conn.close()
+            return jsonify({"success": True, "z_closed_today": False, "closed_at": None})
+
         z_closed_today = False
         closed_at = None
 
-        if row and row[0]:
-            last_ts = row[0]
-            if last_ts.date() == datetime.now(chicago_tz).date():
-                z_closed_today = True
-                closed_at = last_ts.strftime("%Y-%m-%d %H:%M:%S")
+        if not row or not row[0]:
+            # No timestamp exists — set to current Chicago time
+            cur.execute("UPDATE lastzreport SET last_ts = %s", (now_local,))
+            conn.commit()
+            cur.close()
+            conn.close()
+            return jsonify({"success": True, "z_closed_today": False, "closed_at": None})
+
+        last_ts = row[0]
+
+        # Normalize database timestamp (convert naive → Chicago timezone)
+        if last_ts.tzinfo is None:
+            last_ts = chicago_tz.localize(last_ts)
+        else:
+            last_ts = last_ts.astimezone(chicago_tz)
+
+        # If timestamp is in the future, reset to now and return false
+        if last_ts > now_local:
+            cur.execute("UPDATE lastzreport SET last_ts = %s", (now_local,))
+            conn.commit()
+            cur.close()
+            conn.close()
+            return jsonify({"success": True, "z_closed_today": False, "closed_at": None})
+
+        # Normal same-day check
+        if last_ts.date() == now_local.date():
+            z_closed_today = True
+            closed_at = last_ts.strftime("%Y-%m-%d %H:%M:%S")
 
         cur.close()
         conn.close()
