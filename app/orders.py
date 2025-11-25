@@ -54,7 +54,7 @@ def add_order():
     order_details = {
         "time": data.get('time'), "day": data.get('day'), "month": data.get('month'),
         "year": data.get('year'), "total_price": data.get('total_price'), "tip": data.get('tip'),
-        "special_notes": data.get('special_notes'), "payment_method": data.get('payment_method')
+        "special_notes": data.get('special_notes'), "payment_method": data.get('payment_method'), "tax": data.get('tax')
     }
     items_list = data.get('items')
 
@@ -73,14 +73,14 @@ def add_order():
     try:
         cur = conn.cursor()
         order_sql = """
-            INSERT INTO orders (time, day, month, year, total_price, tip, special_notes, payment_method)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s) RETURNING order_id
+            INSERT INTO orders (time, day, month, year, total_price, tip, special_notes, payment_method, tax)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING order_id
         """
         # Use .get() for optional fields like tip and special_notes
         order_values = (
             order_details["time"], order_details["day"], order_details["month"],
             order_details["year"], order_details["total_price"], order_details.get("tip"),
-            order_details.get("special_notes"), order_details["payment_method"]
+            order_details.get("special_notes"), order_details["payment_method"], order_details["tax"]
         )
         cur.execute(order_sql, order_values)
         new_order_id = cur.fetchone()[0]
