@@ -68,6 +68,9 @@ def create_app():
     from . import reports
     app.register_blueprint(reports.reports_bp)
 
+    from . import discounts    
+    app.register_blueprint(discounts.discounts_bp)
+    
     @app.route("/health")
     def health():
         return "OK", 200
