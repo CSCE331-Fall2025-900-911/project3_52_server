@@ -160,3 +160,10 @@ To test protected routes, you must authenticate as a staff member. This flow mus
 2. Go to the **Application** tab.
 3. Find **Cookies > http://localhost:5000**.
 4. Copy the **Value** of the cookie named `session`.
+
+
+#### Create test data:
+
+1. Run genNewOrders.py with the last date (inclusive) that you want to create order days for up until the current date'
+2. Run exportNewOrdersToDB.py to copy all new orders into the AWS databases. Take note of the delete command, as it will allow
+for backtracking the export.

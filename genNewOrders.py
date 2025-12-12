@@ -196,6 +196,7 @@ while (currentDate <= endDate):
         tip = round(random.uniform(0,5),2)
         special_notes = fake.sentence() if random.random() < 0.3 else ""
         payment_method = random.choice(payment_methods)
+        tax = 0.0825 * totalPrice
 
         order = [
             orderID,
@@ -206,7 +207,8 @@ while (currentDate <= endDate):
             round(totalPrice,2),
             tip,
             special_notes,
-            payment_method
+            payment_method,
+            tax
         ]
         orderID = orderID+1
         totalRevenue += totalPrice
@@ -225,7 +227,7 @@ writer.writerow(['item_id','order_id','product_id','size','sugar_level','ice_lev
 writer.writerows(items)
 
 writer = csv.writer(ordersTable)
-writer.writerow(['order_id','time','day','month','year','total_price','tip','special_notes','payment_method'])
+writer.writerow(['order_id','time','day','month','year','total_price','tip','special_notes','payment_method', 'tax'])
 writer.writerows(orders)
 
 ordersTable.close()

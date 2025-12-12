@@ -46,6 +46,28 @@ def get_orders():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+# calculate the change in inventory for an Item in an Order
+def calc_inv_usage(item):
+    single_inv_change = {
+        "Small Cups": 0,
+        "Medium Cups": 0,
+        "Large Cups": 0,
+        "Lids": 0,
+        "Straws": 0,
+    }
+
+    size = item.get("size")
+    if size == "Small":
+        single_inv_change["Small Cups"] += 1
+    elif size == "Medium":
+        single_inv_change["Medium Cups"] += 1
+    elif size == "Large" or size == "Bucee's":
+        single_inv_change["Large Cups"] += 1
+        
+    single_inv_change["Lids"] += 1
+    single_inv_change["Straws"] += 1
+
+    return single_inv_change
 
 @orders_bp.route('/orders', methods=['POST'], strict_slashes=False)
 def add_order():
@@ -85,6 +107,14 @@ def add_order():
         cur.execute(order_sql, order_values)
         new_order_id = cur.fetchone()[0]
 
+        total_inv_change = {
+            "Small Cups": 0,
+            "Medium Cups": 0,
+            "Large Cups": 0,
+            "Lids": 0,
+            "Straws": 0,
+        }
+
         item_sql = """
             INSERT INTO items (order_id, product_id, size, sugar_level, ice_level, toppings, price, quantity)
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
@@ -101,6 +131,17 @@ def add_order():
                 item.get('quantity', 1)
             )
             cur.execute(item_sql, item_values)
+
+            single_inv_change = calc_inv_usage(item) #total up all inventory changes for this one order
+            for key in total_inv_change:
+                total_inv_change[key] += single_inv_change[key]
+
+        for inv_item, change in total_inv_change.items():
+            if change != 0:
+                inv_sql = """
+                    UPDATE inventory SET units_remaining = units_remaining - %s WHERE name = %s
+                """
+                cur.execute(inv_sql, (change, inv_item))
 
         conn.commit()
         cur.close()
