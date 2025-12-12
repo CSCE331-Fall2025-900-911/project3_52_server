@@ -86,13 +86,19 @@ def add_order():
         new_order_id = cur.fetchone()[0]
 
         item_sql = """
-            INSERT INTO items (order_id, product_id, size, sugar_level, ice_level, toppings, price)
-            VALUES (%s, %s, %s, %s, %s, %s, %s)
+            INSERT INTO items (order_id, product_id, size, sugar_level, ice_level, toppings, price, quantity)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
         """
         for item in items_list:
             item_values = (
-                new_order_id, item.get('product_id'), item.get('size'),
-                item.get('sugar_level'), item.get('ice_level'), item.get('toppings'), item.get('price')
+                new_order_id,
+                item.get('product_id'),
+                item.get('size'),
+                item.get('sugar_level'),
+                item.get('ice_level'),
+                item.get('toppings'),
+                item.get('price'),
+                item.get('quantity', 1)
             )
             cur.execute(item_sql, item_values)
 
@@ -132,6 +138,7 @@ def get_order_by_id(order_id):
         order_columns = [desc[0] for desc in cur.description]
         order_details = dict(zip(order_columns, order_row))
 
+        # items table includes `quantity` (default 1) to support multiple identical items
         # 2. Get all items for that order, joining with products to get product_name
         # We use LEFT JOIN in case a product was somehow deleted
         # but we still want to show the order item.
