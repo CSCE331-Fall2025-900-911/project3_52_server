@@ -1,6 +1,10 @@
 from app.db import get_db_connection
 
 
+# NOTE:
+# lastzreport is a singleton system-state table and must NOT be reset or lost
+# during bulk CSV imports. This script explicitly preserves it.
+
 print('\n\n## WARNING ## DO NOT DO THIS PROCESS REPEATEDLY WITHOUT VERIFYING THE DATA EACH TIME\n' +
       '\t YOU MAY DELETE ALL OLD DATA')
 
@@ -14,6 +18,11 @@ conn = get_db_connection()
 if conn == None:
     exit(1)
 cur = conn.cursor()
+
+# === Preserve lastzreport (singleton state table) ===
+cur.execute("SELECT last_z_time FROM lastzreport LIMIT 1;")
+row = cur.fetchone()
+saved_last_z_time = row[0] if row else None
 
 try:
     # === IMPORT newOrders.csv → orders table ===
@@ -39,7 +48,23 @@ try:
             f
         )
     print("Imported newItems.csv → items table")
-    
+
+    conn.commit()
+
+    # === Restore lastzreport if it was wiped by reset/import ===
+    if saved_last_z_time is not None:
+        cur.execute(
+            "UPDATE lastzreport SET last_z_time = %s;",
+            (saved_last_z_time,)
+        )
+    else:
+        cur.execute(
+            """
+            INSERT INTO lastzreport (last_z_time)
+            SELECT NOW()
+            WHERE NOT EXISTS (SELECT 1 FROM lastzreport);
+            """
+        )
     conn.commit()
     
     print('\n\nNotes: FIND OLD DB VERSION IN tables/items.csv and orders.csv TO REVERT ANY CHANGES')
