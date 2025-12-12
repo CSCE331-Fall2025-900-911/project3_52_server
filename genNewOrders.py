@@ -76,13 +76,20 @@ with open('tables/products.csv', 'r') as products:
 
 products = [line.strip().split(',') for line in products][1:]
 
-with open('tables/orders.csv', 'r') as orders:
-    orderID = int(orders.readlines()[-1].strip().split(',')[0]) + 1
+# Determine next orderID from database, not CSV (avoids stale ID collisions)
+conn = get_db_connection()
+if conn is None:
+    exit(1)
+cur = conn.cursor()
 
-with open('tables/items.csv', 'r') as items:
-    itemID = int(items.readlines()[-1].strip().split(',')[0]) + 1
+cur.execute("SELECT COALESCE(MAX(order_id), 0) FROM orders;")
+orderID = cur.fetchone()[0] + 1
 
+cur.execute("SELECT COALESCE(MAX(item_id), 0) FROM items;")
+itemID = cur.fetchone()[0] + 1
 
+cur.close()
+conn.close()
 
 """
 Writing Orders table and Items table
@@ -153,6 +160,10 @@ while (currentDate <= endDate):
         order_items_for_this_order = []
 
         for _ in range(numItems):
+            # Quantity per identical item (1–3)
+            quantity = random.randint(1, 3)
+            quantity = max(1, quantity)
+
             prd = random.choice(products)
             productID = int(prd[0])
             base_price = float(prd[2])
@@ -188,7 +199,8 @@ while (currentDate <= endDate):
                 sugar_level,
                 ice_level,
                 toppings_str,
-                round(price,2)
+                round(price, 2),
+                quantity
             ]
             order_items_for_this_order.append(item)
             itemID += 1
@@ -219,11 +231,11 @@ while (currentDate <= endDate):
 
 
 
-ordersTable     = open('tables/newOrders.csv', 'w', newline='') # using newline just to be safe. 
+ordersTable     = open('tables/newOrders.csv', 'w', newline='') # using newline just to be safe.
 itemsTable      = open('tables/newItems.csv', 'w', newline='')
 
 writer = csv.writer(itemsTable)
-writer.writerow(['item_id','order_id','product_id','size','sugar_level','ice_level','toppings','price'])
+writer.writerow(['item_id','order_id','product_id','size','sugar_level','ice_level','toppings','price','quantity'])
 writer.writerows(items)
 
 writer = csv.writer(ordersTable)

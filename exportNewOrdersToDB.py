@@ -20,7 +20,7 @@ if conn == None:
 cur = conn.cursor()
 
 # === Preserve lastzreport (singleton state table) ===
-cur.execute("SELECT last_z_time FROM lastzreport LIMIT 1;")
+cur.execute("SELECT last_ts FROM lastzreport LIMIT 1;")
 row = cur.fetchone()
 saved_last_z_time = row[0] if row else None
 
@@ -54,13 +54,13 @@ try:
     # === Restore lastzreport if it was wiped by reset/import ===
     if saved_last_z_time is not None:
         cur.execute(
-            "UPDATE lastzreport SET last_z_time = %s;",
+            "UPDATE lastzreport SET last_ts = %s;",
             (saved_last_z_time,)
         )
     else:
         cur.execute(
             """
-            INSERT INTO lastzreport (last_z_time)
+            INSERT INTO lastzreport (last_ts)
             SELECT NOW()
             WHERE NOT EXISTS (SELECT 1 FROM lastzreport);
             """
