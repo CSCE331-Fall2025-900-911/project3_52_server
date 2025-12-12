@@ -121,7 +121,7 @@ currentDate = startDate
 sizes = ['Small', 'Medium', 'Large', 'Bucee\'s']
 sugar_or_ice = ['0', '50', '75', '100']
 toppings_options = ['Boba','Pudding','Red Bean','Grass Jelly','Lychee Jelly','Crystal Boba','None']
-payment_methods = ["Cash", "Mobile Pay", "Credit Card"]
+payment_methods = ["Cash", "Mobile Pay", "Card"]
 
 
 while (currentDate <= endDate):
